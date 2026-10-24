@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+/* Design tokens. "static" keeps every variable available to the plain CSS below. */
+@theme static {
+  --font-display: "Fraunces", serif;
+  --font-body: "Schibsted Grotesk", sans-serif;
+  --font-mono: "Martian Mono", monospace;
+
+  --color-ink: #06100c;
+  --color-pine: #0c1f17;
+  --color-panel: #0f241b;
+  --color-moss: #14301f;
+  --color-line: #24402f;
+  --color-cream: #efe7d3;
+  --color-mist: #a9b5a6;
+  --color-signal: #ff5b21;
+  --color-brass: #d4a94a;
+  --color-danger: #ff6b6b;
+}
+
+/* ---------- Atmosphere ---------- */
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-body);
+  color: var(--color-cream);
+  background-color: var(--color-ink);
+  background-image:
+    radial-gradient(900px 500px at 85% -10%, rgb(255 91 33 / 0.18), transparent 60%),
+    radial-gradient(700px 600px at -5% 25%, rgb(212 169 74 / 0.1), transparent 60%),
+    repeating-linear-gradient(115deg, rgb(239 231 211 / 0.025) 0 1px, transparent 1px 38px),
+    linear-gradient(180deg, var(--color-pine), var(--color-ink));
+  background-attachment: fixed;
+}
+::selection { background: var(--color-signal); color: var(--color-ink); }
+
+.lane {
+  height: 3px;
+  opacity: 0.55;
+  background: repeating-linear-gradient(90deg, var(--color-brass) 0 22px, transparent 22px 40px);
+}
+.rings {
+  position: absolute; right: -14rem; bottom: -14rem; width: 44rem; height: 44rem;
+  border-radius: 50%; pointer-events: none;
+  background: repeating-radial-gradient(circle, transparent 0 30px, rgb(239 231 211 / 0.07) 30px 31px);
+  mask-image: radial-gradient(circle, #000 30%, transparent 70%);
+}
+
+/* ---------- Motion ---------- */
+@keyframes rise { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes shimmer { to { background-position: -200% 0; } }
+@keyframes toast-in { from { opacity: 0; transform: translateY(20px) scale(0.96); } to { opacity: 1; transform: none; } }
+
+/* Staggered reveal: set style="--i: n" on the element. */
+.reveal { animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 70ms); }
+.modal-backdrop { animation: fade 0.25s ease both; }
+.modal-panel { animation: rise 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.toast { position: fixed; left: 50%; bottom: 1.5rem; translate: -50% 0; z-index: 60; animation: toast-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+.skeleton {
+  height: 25rem; border-radius: 1rem; border: 1px solid var(--color-line);
+  background: linear-gradient(100deg, rgb(20 48 31 / 0.5) 30%, rgb(36 64 47 / 0.7) 50%, rgb(20 48 31 / 0.5) 70%);
+  background-size: 200% 100%; animation: shimmer 1.4s linear infinite;
+}
+
+/* ---------- Form controls ---------- */
+.label {
+  display: block; margin-bottom: 0.35rem; font-family: var(--font-mono);
+  font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-mist);
+}
+.field {
+  width: 100%; padding: 0.75rem 0.9rem; font: inherit; color: var(--color-cream);
+  background: rgb(6 16 12 / 0.7); border: 1px solid var(--color-line); border-radius: 0.6rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.field::placeholder { color: rgb(169 181 166 / 0.5); }
+.field:focus { outline: none; border-color: var(--color-signal); box-shadow: 0 0 0 3px rgb(255 91 33 / 0.2); }
+select.field option { background: var(--color-pine); }
+
+/* ---------- Buttons ---------- */
+.btn {
+  position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center;
+  gap: 0.5rem; padding: 0.7rem 1.1rem; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.02em;
+  border: 1px solid transparent; border-radius: 0.6rem; cursor: pointer;
+  transition: transform 0.15s, background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+.btn:active:not(:disabled) { transform: translateY(1px) scale(0.99); }
+.btn:disabled { cursor: not-allowed; opacity: 0.45; }
+.btn-sm { padding: 0.4rem 0.7rem; font-size: 0.78rem; }
+.btn-primary { background: var(--color-signal); color: #1a0a03; }
+.btn-primary:hover:not(:disabled) { background: #ff7340; }
+.btn-primary::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-120%);
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
+}
+.btn-primary:hover:not(:disabled)::after { transform: translateX(120%); transition: transform 0.7s ease; }
+.btn-ghost { background: transparent; color: var(--color-cream); border-color: var(--color-line); }
+.btn-ghost:hover:not(:disabled) { border-color: var(--color-brass); color: var(--color-brass); }
+.btn-danger:hover:not(:disabled) { border-color: var(--color-danger); color: var(--color-danger); }
+
+/* ---------- Vehicle card ---------- */
+.card {
+  position: relative; overflow: hidden; border: 1px solid var(--color-line); border-radius: 1rem;
+  background: linear-gradient(160deg, rgb(20 48 31 / 0.75), rgb(10 24 17 / 0.85));
+  backdrop-filter: blur(6px);
+  transition: transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1), border-color 0.3s, box-shadow 0.35s;
+}
+.card:hover {
+  transform: translateY(-6px); border-color: var(--color-brass);
+  box-shadow: 0 24px 50px -24px rgb(0 0 0 / 0.8), 0 0 0 1px rgb(212 169 74 / 0.25);
+}
+.card-art {
+  position: relative; height: 9.5rem; overflow: hidden;
+  background:
+    radial-gradient(120% 120% at 20% 0%, rgb(255 91 33 / 0.35), transparent 55%),
+    repeating-linear-gradient(115deg, rgb(239 231 211 / 0.06) 0 2px, transparent 2px 14px),
+    var(--color-moss);
+}
+.card-initial {
+  position: absolute; right: -0.4rem; bottom: -2.2rem; line-height: 1; font-size: 11rem;
+  font-family: var(--font-display); font-style: italic; font-weight: 800;
+  color: transparent; -webkit-text-stroke: 1.5px rgb(239 231 211 / 0.35);
+  transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1), -webkit-text-stroke-color 0.3s;
+}
+.card:hover .card-initial { transform: translateX(-10px) scale(1.04); -webkit-text-stroke-color: rgb(255 91 33 / 0.8); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
