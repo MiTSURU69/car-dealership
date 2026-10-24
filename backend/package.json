@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "ts-node-dev --respawn src/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js",
-  "test": "jest",
-  "test:coverage": "jest --coverage"
-},
+    "dev": "ts-node-dev --respawn src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -29,6 +29,6 @@
     "supertest": "^7.3.1",
     "ts-jest": "^29.4.15",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^7.0.2"
+    "typescript": "^6.0.3"
   }
 }
