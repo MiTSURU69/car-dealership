@@ -14,7 +14,8 @@ export const app = express();
 app.set('trust proxy', 1);
 
 app.use(helmet());
-app.use(cors());
+// In production FRONTEND_URL is the website's address (no trailing slash); unset means any origin.
+app.use(cors({ origin: process.env.FRONTEND_URL || true }));
 app.use(express.json());
 
 app.get('/api/health', (_req, res) => {
