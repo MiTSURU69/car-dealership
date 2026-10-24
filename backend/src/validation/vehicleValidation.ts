@@ -39,3 +39,40 @@ export function parseNewVehicle(body: any): VehicleInput {
     quantity: body?.quantity === undefined ? 0 : validQuantity(body.quantity),
   };
 }
+export interface VehicleSearchFilters {
+  make?: string;
+  model?: string;
+  category?: string;
+  minPrice?: number;
+  maxPrice?: number;
+}
+
+function optionalText(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value.trim() : undefined;
+}
+
+function optionalPrice(value: unknown, field: string): number | undefined {
+  if (value === undefined || value === '') return undefined;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    throw new AppError(400, `${field} must be a number that is 0 or more`);
+  }
+  return parsed;
+}
+
+/** Validates the query string of a search request. Every filter is optional. */
+export function parseSearchQuery(query: any): VehicleSearchFilters {
+  const filters: VehicleSearchFilters = {
+    make: optionalText(query?.make),
+    model: optionalText(query?.model),
+    category: optionalText(query?.category),
+    minPrice: optionalPrice(query?.minPrice, 'minPrice'),
+    maxPrice: optionalPrice(query?.maxPrice, 'maxPrice'),
+  };
+
+  const { minPrice, maxPrice } = filters;
+  if (minPrice !== undefined && maxPrice !== undefined && minPrice > maxPrice) {
+    throw new AppError(400, 'minPrice cannot be greater than maxPrice');
+  }
+  return filters;
+}
