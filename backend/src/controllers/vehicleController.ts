@@ -5,3 +5,7 @@ export const create = asyncHandler(async (req, res) => {
   const vehicle = await vehicleService.createVehicle(req.body);
   res.status(201).json({ vehicle });
 });
+export const list = asyncHandler(async (_req, res) => {
+  const vehicles = await vehicleService.listVehicles();
+  res.json({ vehicles });
+});

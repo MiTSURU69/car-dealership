@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { create } from '../controllers/vehicleController';
+import { create, list } from '../controllers/vehicleController';
 import { authenticate } from '../middleware/authMiddleware';
 
 export const vehicleRoutes = Router();
@@ -8,3 +8,4 @@ export const vehicleRoutes = Router();
 vehicleRoutes.use(authenticate);
 
 vehicleRoutes.post('/', create);
+vehicleRoutes.get('/', list);
