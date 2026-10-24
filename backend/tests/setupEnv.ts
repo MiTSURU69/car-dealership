@@ -2,6 +2,7 @@
 process.env.DATABASE_URL = 'file:./test.db';
 process.env.JWT_SECRET = 'test-secret';
 process.env.AUTH_RATE_LIMIT_MAX = '10000'; // effectively off; the limiter has its own dedicated testa
+process.env.FRONTEND_URL = 'https://shop.example.com';
 
 // Tests must never touch the real internet. By default every fetch() fails;
 // individual tests override this with mockResolvedValueOnce.
