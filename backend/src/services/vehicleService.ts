@@ -40,3 +40,8 @@ export async function updateVehicle(rawId: unknown, body: unknown): Promise<Vehi
   await getVehicleOrThrow(id);
   return prisma.vehicle.update({ where: { id }, data });
 }
+export async function deleteVehicle(rawId: unknown): Promise<void> {
+  const id = parseVehicleId(rawId);
+  await getVehicleOrThrow(id);
+  await prisma.vehicle.delete({ where: { id } });
+}

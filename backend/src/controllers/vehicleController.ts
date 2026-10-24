@@ -19,3 +19,7 @@ export const update = asyncHandler(async (req, res) => {
   const vehicle = await vehicleService.updateVehicle(req.params.id, req.body);
   res.json({ vehicle });
 });
+export const remove = asyncHandler(async (req, res) => {
+  await vehicleService.deleteVehicle(req.params.id);
+  res.status(204).send();
+});
