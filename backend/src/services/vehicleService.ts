@@ -79,3 +79,10 @@ export async function purchaseVehicle(rawId: unknown, body: unknown): Promise<Ve
   }
   return getVehicleOrThrow(id);
 }
+/** Adds `quantity` vehicles to the stock. The increment is done by the database itself. */
+export async function restockVehicle(rawId: unknown, body: unknown): Promise<Vehicle> {
+  const id = parseVehicleId(rawId);
+  const quantity = parseRestockQuantity(body);
+  await getVehicleOrThrow(id);
+  return prisma.vehicle.update({ where: { id }, data: { quantity: { increment: quantity } } });
+}

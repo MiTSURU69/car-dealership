@@ -27,3 +27,7 @@ export const purchase = asyncHandler(async (req, res) => {
   const vehicle = await vehicleService.purchaseVehicle(req.params.id, req.body);
   res.json({ vehicle });
 });
+export const restock = asyncHandler(async (req, res) => {
+  const vehicle = await vehicleService.restockVehicle(req.params.id, req.body);
+  res.json({ vehicle });
+});
