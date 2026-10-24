@@ -121,7 +121,7 @@ export function parseVehicleUpdate(body: any): VehicleUpdate {
     // An empty value means "search for one again", stored as null until the service fills it in.
     update.imageUrl = optionalImageUrl(body.imageUrl) ?? null;
   }
-  
+
   if (Object.keys(update).length === 0) {
     throw new AppError(400, 'Provide at least one field to update');
   }
@@ -145,4 +145,39 @@ export function parsePurchaseQuantity(body: any): number {
 export function parseRestockQuantity(body: any): number {
   if (body?.quantity === undefined) throw new AppError(400, 'quantity is required');
   return positiveWholeNumber(body.quantity);
+}
+
+export const SORT_OPTIONS = ['newest', 'oldest', 'price_asc', 'price_desc', 'name'] as const;
+export type SortOption = (typeof SORT_OPTIONS)[number];
+
+export const DEFAULT_PAGE_SIZE = 12;
+export const MAX_PAGE_SIZE = 50;
+
+export interface ListOptions {
+  sort?: SortOption;
+  page: number;
+  limit: number;
+}
+
+/** A query value that must be a whole number between min and max. */
+function wholeNumberParam(value: unknown, fallback: number, field: string, min: number, max: number): number {
+  if (value === undefined || value === '') return fallback;
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || parsed < min || parsed > max) {
+    throw new AppError(400, `${field} must be a whole number between ${min} and ${max}`);
+  }
+  return parsed;
+}
+
+/** Validates sort, page and limit from the query string. All are optional. */
+export function parseListOptions(query: any): ListOptions {
+  const sort = query?.sort;
+  if (sort !== undefined && sort !== '' && !SORT_OPTIONS.includes(sort)) {
+    throw new AppError(400, `sort must be one of: ${SORT_OPTIONS.join(', ')}`);
+  }
+  return {
+    sort: sort ? (sort as SortOption) : undefined,
+    page: wholeNumberParam(query?.page, 1, 'page', 1, Number.MAX_SAFE_INTEGER),
+    limit: wholeNumberParam(query?.limit, DEFAULT_PAGE_SIZE, 'limit', 1, MAX_PAGE_SIZE),
+  };
 }

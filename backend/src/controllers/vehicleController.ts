@@ -6,27 +6,30 @@ export const create = asyncHandler(async (req, res) => {
   res.status(201).json({ vehicle });
 });
 
-export const list = asyncHandler(async (_req, res) => {
-  const vehicles = await vehicleService.listVehicles();
-  res.json({ vehicles });
+// list and search return { vehicles, pagination }
+export const list = asyncHandler(async (req, res) => {
+  res.json(await vehicleService.listVehicles(req.query));
 });
 
 export const search = asyncHandler(async (req, res) => {
-  const vehicles = await vehicleService.searchVehicles(req.query);
-  res.json({ vehicles });
+  res.json(await vehicleService.searchVehicles(req.query));
 });
+
 export const update = asyncHandler(async (req, res) => {
   const vehicle = await vehicleService.updateVehicle(req.params.id, req.body);
   res.json({ vehicle });
 });
+
 export const remove = asyncHandler(async (req, res) => {
   await vehicleService.deleteVehicle(req.params.id);
   res.status(204).send();
 });
+
 export const purchase = asyncHandler(async (req, res) => {
   const vehicle = await vehicleService.purchaseVehicle(req.params.id, req.body);
   res.json({ vehicle });
 });
+
 export const restock = asyncHandler(async (req, res) => {
   const vehicle = await vehicleService.restockVehicle(req.params.id, req.body);
   res.json({ vehicle });

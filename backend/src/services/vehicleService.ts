@@ -2,17 +2,40 @@ import { Prisma, Vehicle } from '@prisma/client';
 import { prisma } from '../db';
 import { AppError } from '../errors/AppError';
 import {
+  ListOptions,
+  parseListOptions,
   parseNewVehicle,
   parsePurchaseQuantity,
   parseRestockQuantity,
   parseSearchQuery,
   parseVehicleId,
   parseVehicleUpdate,
+  SortOption,
   VehicleSearchFilters,
 } from '../validation/vehicleValidation';
 import { findVehicleImage } from './imageService';
 
-const ORDER_BY_ID = { id: 'asc' } as const;
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface VehiclePage {
+  vehicles: Vehicle[];
+  pagination: Pagination;
+}
+
+/** Maps a sort option to a Prisma ordering. No option keeps the original id order. */
+const ORDERINGS: Record<SortOption | 'default', Prisma.VehicleOrderByWithRelationInput[]> = {
+  default: [{ id: 'asc' }],
+  newest: [{ createdAt: 'desc' }, { id: 'desc' }],
+  oldest: [{ createdAt: 'asc' }, { id: 'asc' }],
+  price_asc: [{ price: 'asc' }, { id: 'asc' }],
+  price_desc: [{ price: 'desc' }, { id: 'asc' }],
+  name: [{ make: 'asc' }, { model: 'asc' }, { id: 'asc' }],
+};
 
 /**
  * Turns validated search filters into a Prisma query.
@@ -29,6 +52,21 @@ function buildSearchFilter(filters: VehicleSearchFilters): Prisma.VehicleWhereIn
   return where;
 }
 
+/** Runs one filtered, sorted, paginated query and reports the totals. */
+async function findPage(where: Prisma.VehicleWhereInput, options: ListOptions): Promise<VehiclePage> {
+  const { sort, page, limit } = options;
+  const [total, vehicles] = await prisma.$transaction([
+    prisma.vehicle.count({ where }),
+    prisma.vehicle.findMany({
+      where,
+      orderBy: ORDERINGS[sort ?? 'default'],
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+  ]);
+  return { vehicles, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } };
+}
+
 async function getVehicleOrThrow(id: number): Promise<Vehicle> {
   const vehicle = await prisma.vehicle.findUnique({ where: { id } });
   if (!vehicle) throw new AppError(404, 'Vehicle not found');
@@ -42,19 +80,19 @@ export async function createVehicle(body: unknown): Promise<Vehicle> {
   return prisma.vehicle.create({ data: { ...input, imageUrl } });
 }
 
-export async function listVehicles(): Promise<Vehicle[]> {
-  return prisma.vehicle.findMany({ orderBy: ORDER_BY_ID });
+export async function listVehicles(query: unknown): Promise<VehiclePage> {
+  return findPage({}, parseListOptions(query));
 }
 
-export async function searchVehicles(query: unknown): Promise<Vehicle[]> {
-  const where = buildSearchFilter(parseSearchQuery(query));
-  return prisma.vehicle.findMany({ where, orderBy: ORDER_BY_ID });
+export async function searchVehicles(query: unknown): Promise<VehiclePage> {
+  return findPage(buildSearchFilter(parseSearchQuery(query)), parseListOptions(query));
 }
 
 export async function updateVehicle(rawId: unknown, body: unknown): Promise<Vehicle> {
   const id = parseVehicleId(rawId);
   const data = parseVehicleUpdate(body);
   const existing = await getVehicleOrThrow(id);
+
   // imageUrl === null means the caller cleared it: search again for the (possibly renamed) car.
   if (data.imageUrl === null) {
     data.imageUrl = await findVehicleImage(data.make ?? existing.make, data.model ?? existing.model);
