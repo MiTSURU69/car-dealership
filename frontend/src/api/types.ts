@@ -30,3 +30,17 @@ export interface SearchFilters {
   minPrice: string;
   maxPrice: string;
 }
+
+export type SortOption = 'newest' | 'oldest' | 'price_asc' | 'price_desc' | 'name';
+
+export interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
+export interface ListQuery {
+  sort: SortOption | '';
+  page: number;
+}

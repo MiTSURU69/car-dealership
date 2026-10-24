@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { vehicleApi } from '../api/endpoints';
-import type { SearchFilters, Vehicle } from '../api/types';
+import type { ListQuery, Pagination, SearchFilters, SortOption, Vehicle } from '../api/types';
 import { useAuth } from '../auth/AuthContext';
 import { Brand } from '../components/Brand';
+import { Pager } from '../components/Pager';
 import { RestockModal } from '../components/RestockModal';
 import { SearchBar } from '../components/SearchBar';
 import { Toast, useToast } from '../components/Toast';
@@ -13,6 +14,14 @@ import { stagger } from '../lib/stagger';
 
 const EMPTY_FILTERS: SearchFilters = { make: '', model: '', category: '', minPrice: '', maxPrice: '' };
 
+const SORT_LABELS: Record<SortOption, string> = {
+  newest: 'Newest first',
+  oldest: 'Oldest first',
+  price_asc: 'Price: low to high',
+  price_desc: 'Price: high to low',
+  name: 'Make: A to Z',
+};
+
 export function DashboardPage() {
   const { user, logout } = useAuth();
   const isAdmin = user?.role === 'admin';
@@ -20,6 +29,9 @@ export function DashboardPage() {
 
   const [filters, setFilters] = useState<SearchFilters>(EMPTY_FILTERS);
   const [inStockOnly, setInStockOnly] = useState(false);
+  const [sort, setSort] = useState<SortOption | ''>('');
+  const [page, setPage] = useState(1);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,21 +43,21 @@ export function DashboardPage() {
 
   const hasFilters = Object.values(filters).some((value) => value.trim() !== '');
 
-  // Fetch whenever the filters change. Typing is debounced so we don't call the API on every keystroke.
+  // Fetch whenever the filters, sort or page change. Typing is debounced so we don't call the API on every keystroke.
   useEffect(() => {
     let cancelled = false;
+    const list: ListQuery = { sort, page };
     const timer = setTimeout(
       async () => {
         try {
-          const { vehicles: found } = hasFilters
-            ? await vehicleApi.search(filters)
-            : await vehicleApi.list();
+          const result = await vehicleApi.find(filters, list, hasFilters);
           if (cancelled) return;
-          setVehicles(found);
+          setVehicles(result.vehicles);
+          setPagination(result.pagination);
           setLoadError('');
           // Remember every category we have seen so the dropdown stays complete while filtering.
           setCategories((previous) =>
-            Array.from(new Set([...previous, ...found.map((v) => v.category)])).sort(),
+            Array.from(new Set([...previous, ...result.vehicles.map((v) => v.category)])).sort(),
           );
         } catch (err) {
           if (!cancelled) setLoadError(messageOf(err));
@@ -59,10 +71,17 @@ export function DashboardPage() {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [filters, hasFilters, reloadKey]);
+  }, [filters, hasFilters, sort, page, reloadKey]);
 
   const visible = inStockOnly ? vehicles.filter((v) => v.quantity > 0) : vehicles;
-  const unitsInStock = vehicles.reduce((sum, v) => sum + v.quantity, 0);
+  const totalModels = pagination?.total ?? vehicles.length;
+  const unitsOnPage = vehicles.reduce((sum, v) => sum + v.quantity, 0);
+
+  /** Changing a filter or the sort always goes back to page 1. */
+  function changeFilters(next: SearchFilters) {
+    setFilters(next);
+    setPage(1);
+  }
 
   async function handlePurchase(vehicle: Vehicle) {
     setBusyId(vehicle.id);
@@ -82,8 +101,10 @@ export function DashboardPage() {
     if (!window.confirm(`Delete ${vehicle.make} ${vehicle.model}? This cannot be undone.`)) return;
     try {
       await vehicleApi.remove(vehicle.id);
-      setVehicles((current) => current.filter((v) => v.id !== vehicle.id));
       showToast('Vehicle deleted');
+      // If that was the last car on this page, step back one page.
+      if (vehicles.length === 1 && page > 1) setPage(page - 1);
+      else setReloadKey((key) => key + 1);
     } catch (err) {
       showToast(messageOf(err), 'error');
     }
@@ -104,6 +125,8 @@ export function DashboardPage() {
   function resetFilters() {
     setFilters(EMPTY_FILTERS);
     setInStockOnly(false);
+    setSort('');
+    setPage(1);
   }
 
   return (
@@ -137,12 +160,12 @@ export function DashboardPage() {
           </h1>
           <div className="reveal mt-8 flex gap-10 font-mono" style={stagger(2)}>
             <div>
-              <p className="text-3xl font-semibold">{vehicles.length}</p>
+              <p className="text-3xl font-semibold">{totalModels}</p>
               <p className="mt-1 text-[0.65rem] uppercase tracking-[0.25em] text-mist">Models</p>
             </div>
             <div>
-              <p className="text-3xl font-semibold">{unitsInStock}</p>
-              <p className="mt-1 text-[0.65rem] uppercase tracking-[0.25em] text-mist">Units in stock</p>
+              <p className="text-3xl font-semibold">{unitsOnPage}</p>
+              <p className="mt-1 text-[0.65rem] uppercase tracking-[0.25em] text-mist">Units on this page</p>
             </div>
           </div>
         </section>
@@ -152,21 +175,38 @@ export function DashboardPage() {
             filters={filters}
             categories={categories}
             inStockOnly={inStockOnly}
-            onChange={setFilters}
+            onChange={changeFilters}
             onInStockChange={setInStockOnly}
             onReset={resetFilters}
           />
         </div>
 
-        <div className="mb-6 mt-10 flex items-center justify-between">
+        <div className="mb-6 mt-10 flex flex-wrap items-center justify-between gap-4">
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-mist">
-            {visible.length} {visible.length === 1 ? 'vehicle' : 'vehicles'}
+            {visible.length} shown · {totalModels} total
           </p>
-          {isAdmin && (
-            <button className="btn btn-primary btn-sm" onClick={() => setEditing('new')}>
-              + Add vehicle
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            <label className="sr-only" htmlFor="sort">Sort vehicles</label>
+            <select
+              id="sort"
+              className="field !w-auto !py-2 text-sm"
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value as SortOption | '');
+                setPage(1);
+              }}
+            >
+              <option value="">Default order</option>
+              {(Object.keys(SORT_LABELS) as SortOption[]).map((option) => (
+                <option key={option} value={option}>{SORT_LABELS[option]}</option>
+              ))}
+            </select>
+            {isAdmin && (
+              <button className="btn btn-primary btn-sm" onClick={() => setEditing('new')}>
+                + Add vehicle
+              </button>
+            )}
+          </div>
         </div>
 
         {loadError && (
@@ -202,6 +242,16 @@ export function DashboardPage() {
               />
             ))}
           </div>
+        )}
+
+        {pagination && (
+          <Pager
+            pagination={pagination}
+            onPage={(next) => {
+              setPage(next);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          />
         )}
       </main>
 
