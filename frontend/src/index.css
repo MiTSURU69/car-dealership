@@ -127,3 +127,5 @@ select.field option { background: var(--color-pine); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+.card-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.card:hover .card-photo { transform: scale(1.07); }

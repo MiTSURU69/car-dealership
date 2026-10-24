@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Vehicle } from '../api/types';
 import { formatPrice } from '../lib/format';
 import { stagger } from '../lib/stagger';
@@ -18,14 +19,32 @@ export function VehicleCard({ vehicle, index, isAdmin, busy, onPurchase, onEdit,
   const lowStock = vehicle.quantity > 0 && vehicle.quantity <= 3;
   const stockTone = soldOut ? 'text-signal' : lowStock ? 'text-brass' : 'text-mist';
 
+  // If a photo fails to load, remember which URL failed and fall back to the big-letter artwork.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const showPhoto = vehicle.imageUrl !== null && failedUrl !== vehicle.imageUrl;
+
   return (
     // The wrapper plays the entrance animation; the card inside is free to animate on hover.
     <div className="reveal" style={stagger(index)}>
       <article className="card flex h-full flex-col">
         <div className="card-art">
-          <span className="card-initial" aria-hidden>
-            {vehicle.make.charAt(0).toUpperCase()}
-          </span>
+          {showPhoto ? (
+            <>
+              <img
+                className="card-photo"
+                src={vehicle.imageUrl!}
+                alt={`${vehicle.make} ${vehicle.model}`}
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                onError={() => setFailedUrl(vehicle.imageUrl)}
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-transparent to-ink/30" />
+            </>
+          ) : (
+            <span className="card-initial" aria-hidden>
+              {vehicle.make.charAt(0).toUpperCase()}
+            </span>
+          )}
           <span className="absolute left-4 top-4 rounded-full border border-cream/30 bg-ink/60 px-3 py-1 font-mono text-[0.62rem] uppercase tracking-[0.18em] backdrop-blur">
             {vehicle.category}
           </span>

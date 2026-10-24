@@ -9,7 +9,8 @@
     "start": "node dist/server.js",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "seed:admin": "ts-node src/scripts/seedAdmin.ts"
+    "seed:admin": "ts-node src/scripts/seedAdmin.ts",
+"backfill:images": "ts-node src/scripts/backfillImages.ts"
   },
   "keywords": [],
   "author": "",

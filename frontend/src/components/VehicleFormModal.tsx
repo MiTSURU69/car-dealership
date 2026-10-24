@@ -20,6 +20,7 @@ export function VehicleFormModal({ vehicle, categories, onClose, onSaved }: Prop
     category: vehicle?.category ?? '',
     price: vehicle ? String(vehicle.price) : '',
     quantity: vehicle ? String(vehicle.quantity) : '0',
+    imageUrl: vehicle?.imageUrl ?? '',
   });
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
@@ -43,6 +44,7 @@ export function VehicleFormModal({ vehicle, categories, onClose, onSaved }: Prop
       category: form.category,
       price,
       quantity: Number(form.quantity),
+      imageUrl: form.imageUrl.trim(), // empty = let the server find a photo
     };
 
     setBusy(true);
@@ -89,6 +91,11 @@ export function VehicleFormModal({ vehicle, categories, onClose, onSaved }: Prop
             <input id="v-qty" type="number" min={0} step={1} className="field" required
               value={form.quantity} onChange={set('quantity')} />
           </div>
+        </div>
+        <div>
+          <label className="label" htmlFor="v-image">Image URL (optional)</label>
+          <input id="v-image" type="url" className="field" placeholder="Leave empty to find a photo automatically"
+            value={form.imageUrl} onChange={set('imageUrl')} />
         </div>
 
         {error && (

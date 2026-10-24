@@ -12,12 +12,15 @@ export interface Vehicle {
   category: string;
   price: number;
   quantity: number;
+  imageUrl: string | null;
   createdAt: string;
   updatedAt: string;
 }
 
-/** The fields an admin can set when adding or editing a vehicle. */
-export type VehicleInput = Pick<Vehicle, 'make' | 'model' | 'category' | 'price' | 'quantity'>;
+/** The fields an admin can set. An empty imageUrl means "find one automatically". */
+export type VehicleInput = Pick<Vehicle, 'make' | 'model' | 'category' | 'price' | 'quantity'> & {
+  imageUrl?: string;
+};
 
 /** Search form values. They stay strings because they come straight from inputs. */
 export interface SearchFilters {
