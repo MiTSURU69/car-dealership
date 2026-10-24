@@ -6,7 +6,12 @@ export interface VehicleInput {
   category: string;
   price: number;
   quantity: number;
+  /** Optional photo URL. When missing, the service looks one up. */
+  imageUrl?: string;
 }
+
+/** An update can also send imageUrl: null, which means "find one automatically". */
+export type VehicleUpdate = Partial<Omit<VehicleInput, 'imageUrl'>> & { imageUrl?: string | null };
 
 function requiredText(value: unknown, field: string): string {
   if (typeof value !== 'string' || !value.trim()) {
@@ -29,6 +34,24 @@ function validQuantity(value: unknown): number {
   return value;
 }
 
+/** Accepts only http(s) URLs, so values like "javascript:..." can never reach an <img> tag. */
+function validImageUrl(value: unknown): string {
+  if (typeof value !== 'string') throw new AppError(400, 'imageUrl must be a text URL');
+  try {
+    const url = new URL(value.trim());
+    if (url.protocol === 'http:' || url.protocol === 'https:') return url.toString();
+  } catch {
+    // fall through to the error below
+  }
+  throw new AppError(400, 'imageUrl must be a valid http(s) URL');
+}
+
+/** Empty or missing means "not provided". */
+function optionalImageUrl(value: unknown): string | undefined {
+  if (value === undefined || value === null || value === '') return undefined;
+  return validImageUrl(value);
+}
+
 /** Validates the body of a "create vehicle" request. */
 export function parseNewVehicle(body: any): VehicleInput {
   return {
@@ -37,8 +60,10 @@ export function parseNewVehicle(body: any): VehicleInput {
     category: requiredText(body?.category, 'category'),
     price: validPrice(body?.price),
     quantity: body?.quantity === undefined ? 0 : validQuantity(body.quantity),
+    imageUrl: optionalImageUrl(body?.imageUrl),
   };
 }
+
 export interface VehicleSearchFilters {
   make?: string;
   model?: string;
@@ -76,6 +101,7 @@ export function parseSearchQuery(query: any): VehicleSearchFilters {
   }
   return filters;
 }
+
 /** Validates a vehicle id from the URL. */
 export function parseVehicleId(raw: unknown): number {
   const id = Number(raw);
@@ -84,19 +110,24 @@ export function parseVehicleId(raw: unknown): number {
 }
 
 /** Validates a partial update: only the fields that were sent are checked and kept. */
-export function parseVehicleUpdate(body: any): Partial<VehicleInput> {
-  const update: Partial<VehicleInput> = {};
+export function parseVehicleUpdate(body: any): VehicleUpdate {
+  const update: VehicleUpdate = {};
   if (body?.make !== undefined) update.make = requiredText(body.make, 'make');
   if (body?.model !== undefined) update.model = requiredText(body.model, 'model');
   if (body?.category !== undefined) update.category = requiredText(body.category, 'category');
   if (body?.price !== undefined) update.price = validPrice(body.price);
   if (body?.quantity !== undefined) update.quantity = validQuantity(body.quantity);
-
+  if (body?.imageUrl !== undefined) {
+    // An empty value means "search for one again", stored as null until the service fills it in.
+    update.imageUrl = optionalImageUrl(body.imageUrl) ?? null;
+  }
+  
   if (Object.keys(update).length === 0) {
     throw new AppError(400, 'Provide at least one field to update');
   }
   return update;
 }
+
 function positiveWholeNumber(value: unknown): number {
   if (typeof value !== 'number' || !Number.isInteger(value) || value <= 0) {
     throw new AppError(400, 'quantity must be a whole number greater than 0');

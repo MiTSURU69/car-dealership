@@ -10,6 +10,7 @@ import {
   parseVehicleUpdate,
   VehicleSearchFilters,
 } from '../validation/vehicleValidation';
+import { findVehicleImage } from './imageService';
 
 const ORDER_BY_ID = { id: 'asc' } as const;
 
@@ -35,7 +36,10 @@ async function getVehicleOrThrow(id: number): Promise<Vehicle> {
 }
 
 export async function createVehicle(body: unknown): Promise<Vehicle> {
-  return prisma.vehicle.create({ data: parseNewVehicle(body) });
+  const input = parseNewVehicle(body);
+  // Use the supplied image, otherwise try to find one. A failed lookup just leaves it empty.
+  const imageUrl = input.imageUrl ?? (await findVehicleImage(input.make, input.model));
+  return prisma.vehicle.create({ data: { ...input, imageUrl } });
 }
 
 export async function listVehicles(): Promise<Vehicle[]> {
@@ -50,7 +54,11 @@ export async function searchVehicles(query: unknown): Promise<Vehicle[]> {
 export async function updateVehicle(rawId: unknown, body: unknown): Promise<Vehicle> {
   const id = parseVehicleId(rawId);
   const data = parseVehicleUpdate(body);
-  await getVehicleOrThrow(id);
+  const existing = await getVehicleOrThrow(id);
+  // imageUrl === null means the caller cleared it: search again for the (possibly renamed) car.
+  if (data.imageUrl === null) {
+    data.imageUrl = await findVehicleImage(data.make ?? existing.make, data.model ?? existing.model);
+  }
   return prisma.vehicle.update({ where: { id }, data });
 }
 
@@ -59,6 +67,7 @@ export async function deleteVehicle(rawId: unknown): Promise<void> {
   await getVehicleOrThrow(id);
   await prisma.vehicle.delete({ where: { id } });
 }
+
 /**
  * Buys `quantity` vehicles (default 1).
  * The stock check and the subtraction happen in ONE database statement, so two
@@ -79,6 +88,7 @@ export async function purchaseVehicle(rawId: unknown, body: unknown): Promise<Ve
   }
   return getVehicleOrThrow(id);
 }
+
 /** Adds `quantity` vehicles to the stock. The increment is done by the database itself. */
 export async function restockVehicle(rawId: unknown, body: unknown): Promise<Vehicle> {
   const id = parseVehicleId(rawId);
