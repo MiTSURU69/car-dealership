@@ -3,6 +3,8 @@ import { prisma } from '../db';
 import { AppError } from '../errors/AppError';
 import {
   parseNewVehicle,
+  parsePurchaseQuantity,
+  parseRestockQuantity,
   parseSearchQuery,
   parseVehicleId,
   parseVehicleUpdate,
@@ -56,4 +58,24 @@ export async function deleteVehicle(rawId: unknown): Promise<void> {
   const id = parseVehicleId(rawId);
   await getVehicleOrThrow(id);
   await prisma.vehicle.delete({ where: { id } });
+}
+/**
+ * Buys `quantity` vehicles (default 1).
+ * The stock check and the subtraction happen in ONE database statement, so two
+ * buyers can never both take the last car.
+ */
+export async function purchaseVehicle(rawId: unknown, body: unknown): Promise<Vehicle> {
+  const id = parseVehicleId(rawId);
+  const quantity = parsePurchaseQuantity(body);
+
+  const result = await prisma.vehicle.updateMany({
+    where: { id, quantity: { gte: quantity } },
+    data: { quantity: { decrement: quantity } },
+  });
+
+  if (result.count === 0) {
+    await getVehicleOrThrow(id); // throws 404 if the vehicle does not exist at all
+    throw new AppError(409, 'Not enough vehicles in stock');
+  }
+  return getVehicleOrThrow(id);
 }

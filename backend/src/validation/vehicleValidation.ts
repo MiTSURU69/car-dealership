@@ -97,3 +97,21 @@ export function parseVehicleUpdate(body: any): Partial<VehicleInput> {
   }
   return update;
 }
+function positiveWholeNumber(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isInteger(value) || value <= 0) {
+    throw new AppError(400, 'quantity must be a whole number greater than 0');
+  }
+  return value;
+}
+
+/** How many vehicles to buy. Optional, defaults to 1. */
+export function parsePurchaseQuantity(body: any): number {
+  if (body?.quantity === undefined) return 1;
+  return positiveWholeNumber(body.quantity);
+}
+
+/** How many vehicles to add to stock. Required. */
+export function parseRestockQuantity(body: any): number {
+  if (body?.quantity === undefined) throw new AppError(400, 'quantity is required');
+  return positiveWholeNumber(body.quantity);
+}
