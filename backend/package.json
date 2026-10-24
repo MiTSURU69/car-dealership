@@ -10,7 +10,7 @@
     "test": "jest",
     "test:coverage": "jest --coverage",
     "seed:admin": "ts-node src/scripts/seedAdmin.ts",
-"backfill:images": "ts-node src/scripts/backfillImages.ts"
+    "backfill:images": "ts-node src/scripts/backfillImages.ts"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +22,8 @@
     "cors": "^2.8.6",
     "dotenv": "^18.0.9",
     "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
