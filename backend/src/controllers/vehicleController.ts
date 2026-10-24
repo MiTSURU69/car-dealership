@@ -15,3 +15,7 @@ export const search = asyncHandler(async (req, res) => {
   const vehicles = await vehicleService.searchVehicles(req.query);
   res.json({ vehicles });
 });
+export const update = asyncHandler(async (req, res) => {
+  const vehicle = await vehicleService.updateVehicle(req.params.id, req.body);
+  res.json({ vehicle });
+});

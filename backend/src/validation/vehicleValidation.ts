@@ -76,3 +76,24 @@ export function parseSearchQuery(query: any): VehicleSearchFilters {
   }
   return filters;
 }
+/** Validates a vehicle id from the URL. */
+export function parseVehicleId(raw: unknown): number {
+  const id = Number(raw);
+  if (!Number.isInteger(id) || id <= 0) throw new AppError(400, 'Invalid vehicle id');
+  return id;
+}
+
+/** Validates a partial update: only the fields that were sent are checked and kept. */
+export function parseVehicleUpdate(body: any): Partial<VehicleInput> {
+  const update: Partial<VehicleInput> = {};
+  if (body?.make !== undefined) update.make = requiredText(body.make, 'make');
+  if (body?.model !== undefined) update.model = requiredText(body.model, 'model');
+  if (body?.category !== undefined) update.category = requiredText(body.category, 'category');
+  if (body?.price !== undefined) update.price = validPrice(body.price);
+  if (body?.quantity !== undefined) update.quantity = validQuantity(body.quantity);
+
+  if (Object.keys(update).length === 0) {
+    throw new AppError(400, 'Provide at least one field to update');
+  }
+  return update;
+}

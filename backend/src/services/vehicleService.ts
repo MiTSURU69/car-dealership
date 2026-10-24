@@ -1,6 +1,12 @@
 import { Prisma, Vehicle } from '@prisma/client';
 import { prisma } from '../db';
-import { parseNewVehicle, parseSearchQuery } from '../validation/vehicleValidation';
+import { AppError } from '../errors/AppError';
+import {
+  parseNewVehicle,
+  parseSearchQuery,
+  parseVehicleId,
+  parseVehicleUpdate,
+} from '../validation/vehicleValidation';
 
 export async function createVehicle(body: unknown): Promise<Vehicle> {
   return prisma.vehicle.create({ data: parseNewVehicle(body) });
@@ -21,4 +27,16 @@ export async function searchVehicles(query: unknown): Promise<Vehicle[]> {
   }
 
   return prisma.vehicle.findMany({ where, orderBy: { id: 'asc' } });
+}
+async function getVehicleOrThrow(id: number): Promise<Vehicle> {
+  const vehicle = await prisma.vehicle.findUnique({ where: { id } });
+  if (!vehicle) throw new AppError(404, 'Vehicle not found');
+  return vehicle;
+}
+
+export async function updateVehicle(rawId: unknown, body: unknown): Promise<Vehicle> {
+  const id = parseVehicleId(rawId);
+  const data = parseVehicleUpdate(body);
+  await getVehicleOrThrow(id);
+  return prisma.vehicle.update({ where: { id }, data });
 }
