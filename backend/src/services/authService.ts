@@ -1,6 +1,8 @@
+import { signToken } from './tokenService';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../db';
 import { AppError } from '../errors/AppError';
+
 
 export interface PublicUser {
   id: number;
@@ -38,4 +40,19 @@ export async function registerUser(body: unknown): Promise<PublicUser> {
   const user = await prisma.user.create({ data: { name, email, passwordHash } });
 
   return { id: user.id, name: user.name, email: user.email, role: user.role };
+}
+/** Checks credentials and returns a signed token plus the public user. */
+export async function loginUser(body: any): Promise<{ token: string; user: PublicUser }> {
+  const email = typeof body?.email === 'string' ? body.email.trim().toLowerCase() : '';
+  const password = typeof body?.password === 'string' ? body.password : '';
+  if (!email || !password) throw new AppError(400, 'Email and password are required');
+
+  const user = await prisma.user.findUnique({ where: { email } });
+  const passwordMatches = user ? await bcrypt.compare(password, user.passwordHash) : false;
+
+  // Same message for "no such user" and "wrong password" so attackers can't probe emails.
+  if (!user || !passwordMatches) throw new AppError(401, 'Invalid email or password');
+
+  const token = signToken({ userId: user.id, role: user.role });
+  return { token, user: { id: user.id, name: user.name, email: user.email, role: user.role } };
 }
