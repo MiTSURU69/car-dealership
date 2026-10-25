@@ -46,6 +46,7 @@ The project was built for the **TDD Kata: Car Dealership Inventory System**. Eve
 | **API** | https://apex-api-z6iy.onrender.com |
 | **Admin login** | `admin@example.com` / `admin1` |
 | **Customer login** | Click **Create an account** on the login page. It takes about 10 seconds. |
+| **WikiPedia API** | The API to display car info doesn't work properly in **Safari**
 
 > **Heads up:** the app runs on Render's free tier. The first request after a period of inactivity can take up to a minute while the API wakes up. The free disk also resets on restart, so the database is rebuilt on every start with the admin account and 12 demo vehicles. Any data you add may disappear later; that is expected.
 
