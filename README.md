@@ -43,7 +43,7 @@ The project was built for the **TDD Kata: Car Dealership Inventory System**. Eve
 | | |
 |---|---|
 | **Website** | https://apex-motor-store.onrender.com/ |
-| **API** | https://apex-api-z6iy.onrender.com |
+| **API** | https://apex-api-z6iy.onrender.com/api/health |
 | **Admin login** | `admin@example.com` / `admin1` |
 | **Customer login** | Click **Create an account** on the login page. It takes about 10 seconds. |
 | **WikiPedia API** | The API to display car info doesn't work properly in **Safari**
