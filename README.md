@@ -358,7 +358,7 @@ I set the direction and made the decisions. Claude helped me draft and explain c
 - Drafted test files and implementation code layer by layer (validation, services, controllers, middleware, React components), which I then read, ran and adjusted.
 - Explained trade-offs, such as the atomic stock update, and suggested options for features.
 - Helped diagnose error messages from my terminal and Render logs.
-- Drafted this README from the code and my notes.
+
 
 ### Where I had to catch and correct it
 
