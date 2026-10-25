@@ -355,7 +355,7 @@ I set the direction and made the decisions. Claude helped me draft and explain c
 
 ### What Claude did
 
-- Drafted test files and implementation code layer by layer (validation, services, controllers, middleware, React components), which I then read, ran and adjusted.
+- Drafted test files and helped in implementation (validation, services, controllers, middleware, React components), which I then read, ran and adjusted.
 - Explained trade-offs, such as the atomic stock update, and suggested options for features.
 - Helped diagnose error messages from my terminal and Render logs.
 
