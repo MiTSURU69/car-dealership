@@ -350,7 +350,7 @@ I set the direction and made the decisions. Claude helped me draft and explain c
   - Vehicle photos come from Wikipedia rather than scraping car sites.
   - Sorting, pagination and rate limiting were added from a list of options I picked from.
   - Deployment is on Render.
-- **Frontend direction.** I gave the design brief (distinctive fonts, a committed palette, staggered animation, layered backgrounds) and reviewed the result in the browser. I asked for the pulsing logo dot to be removed because I didn't like it.
+- **Frontend direction.** I gave the design brief (distinctive fonts, a committed palette, staggered animation, layered backgrounds) and reviewed the result in the browser.
 - **Running and debugging.** I ran every command myself on Windows and worked through the problems that came up, including a Prisma and Node version clash, a `package.json` syntax error, a `tsconfig` problem that made Jest run every test twice (150 instead of 75), a misnamed test file the runner silently skipped, and the Render environment setup.
 - **Deployment and security.** I set up both Render services, the environment variables and the CORS lock. I also chose to keep secrets out of the repository and to use a throwaway admin password for the public demo.
 
