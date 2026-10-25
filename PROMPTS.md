@@ -1,6 +1,6 @@
 # AI Prompts Used During Development
 
-This is a record of the requests and follow-up instructions I used while building the car dealership project. The prompts below capture the work and decisions discussed during development; they are not a verbatim export of the original conversation.
+This is a record of the requests and follow-up instructions I used while building the car dealership project. The prompts below capture the work and decisions discussed during development.
 
 ## Planning and architecture
 
