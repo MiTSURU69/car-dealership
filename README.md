@@ -335,35 +335,38 @@ Because the free disk resets, the server recreates the admin account and demo ve
 
 ### Tools used
 
-- **Claude (Anthropic)** was the only AI tool I used, in one long conversation for the whole project. The full log is in [`PROMPTS.md`](PROMPTS.md). Every AI-assisted commit carries a `Co-authored-by` trailer.
+I used **Claude (Anthropic)** as a pair-programming assistant throughout the project. The full, unedited conversation is in [`PROMPTS.md`](PROMPTS.md), and every AI-assisted commit carries a `Co-authored-by` trailer.
 
-### How I used it
+### How I worked
 
-- **Planning:** broke the kata into steps and chose the stack (Node, TypeScript, Express, Prisma, SQLite, Jest).
-- **Tests first:** Claude drafted the test files for each feature, and I ran them to confirm they failed before accepting the implementation. I reviewed the cases and edge cases.
-- **Implementation:** Claude wrote service, controller, validation and middleware code layer by layer, and I ran, read and tested each piece.
-- **Design decisions:** discussed the atomic stock update, 409 for out-of-stock, admin accounts coming from environment variables, and using Wikipedia instead of scraping.
-- **Frontend design:** I asked for a distinctive look (no default fonts, a committed palette, staggered animation, layered backgrounds) and Claude produced the React components and theme. I removed the pulsing logo dot because I didn't like it.
-- **Debugging and deployment:** pasted terminal errors and Render logs and applied the fixes.
+I set the direction and made the decisions. Claude helped me draft and explain code, and I ran, tested, reviewed and fixed everything before it went into a commit.
 
-### Where the AI was wrong, and how I caught it
+- **Scope and stack.** I chose Node.js, TypeScript, Express, SQLite with Prisma, and Jest, and I broke the kata into a step-by-step plan that I followed in order.
+- **Test-first workflow.** For each feature I committed the failing tests first, ran them to confirm they failed, then committed the implementation and ran the suite again. I kept the Red, Green, Refactor order in the Git history and fixed it when it was wrong.
+- **Design decisions I made:**
+  - Purchase stays an inventory operation, with no payment gateway, because the kata doesn't ask for one.
+  - No pre-made demo customer account. Reviewers register their own.
+  - Vehicle photos come from Wikipedia rather than scraping car sites.
+  - Sorting, pagination and rate limiting were added from a list of options I picked from.
+  - Deployment is on Render.
+- **Frontend direction.** I gave the design brief (distinctive fonts, a committed palette, staggered animation, layered backgrounds) and reviewed the result in the browser. I asked for the pulsing logo dot to be removed because I didn't like it.
+- **Running and debugging.** I ran every command myself on Windows and worked through the problems that came up, including a Prisma and Node version clash, a `package.json` syntax error, a `tsconfig` problem that made Jest run every test twice (150 instead of 75), a misnamed test file the runner silently skipped, and the Render environment setup.
+- **Deployment and security.** I set up both Render services, the environment variables and the CORS lock. I also chose to keep secrets out of the repository and to use a throwaway admin password for the public demo.
 
-I kept a list of the problems, because they say more than the successes:
+### What Claude did
 
-- **Prisma and Node version clash.** The first Prisma 5 install crashed on my newer Node. I reported the error, and we moved to Prisma 6.
-- **Missing Red commit.** My history had no separate test commit for the update endpoint. I spotted this when reviewing `git log`, and we split the commit with an interactive rebase.
-- **Wrong sort order in generated code.** The `name` sort was written as descending even though the test expected A to Z. We caught it by reading the code against the test and corrected it.
-- **Stray compiled files.** A failed `tsc` build wrote `.js` copies of my tests next to the `.ts` files, so Jest ran every suite twice (150 tests instead of 75). I noticed the doubled count, deleted the files, restricted Jest to `*.test.ts`, and ignored them in Git.
-- **Config mistakes.** A missing comma in `package.json` and `tests` wrongly included in `tsconfig` for the production build. Both were fixed from the error messages.
-- **File name typo.** `security.tests.ts` would have been silently skipped by the test runner. Found by reading the test list.
-- **Deployment checks.** I verified `prisma.config.ts` was tracked and moved Prisma packages into `dependencies` before deploying.
+- Drafted test files and implementation code layer by layer (validation, services, controllers, middleware, React components), which I then read, ran and adjusted.
+- Explained trade-offs, such as the atomic stock update, and suggested options for features.
+- Helped diagnose error messages from my terminal and Render logs.
+- Drafted this README from the code and my notes.
+
+### Where I had to catch and correct it
+
+- **Wrong sort order.** The generated `name` sort was descending while the test expected A to Z. I corrected it.
+- **Missing Red commit.** My history had no separate test commit for the update endpoint, so I split the commit with an interactive rebase.
+- **Stray compiled files.** A failed `tsc` build left `.js` copies of my tests in the repository. I noticed the doubled test count, removed them and restricted Jest to `*.test.ts`.
+- **Stale instructions.** Several steps arrived incomplete or out of sync with earlier files, and I fixed them by running the tests and reading the errors.
 
 ### Reflection
 
-AI made me much faster at the repetitive parts: boilerplate, test scaffolding and CSS. It was weaker at keeping a large project consistent across many messages, so most of my bugs were mismatches between files it had generated at different times. The habits that helped most were running the tests after every step, reading `git log` and test counts critically, and never accepting a step until it was green. I also learned that TDD works well with AI: a failing test written first is a precise, checkable specification, so I could tell quickly whether generated code was right.
-
-## Credits
-
-- Vehicle photos come from **Wikipedia and Wikimedia Commons** through the public Wikipedia REST API, under their respective free licences. Each photo belongs to its original author.
-- Fonts: [Fraunces](https://fonts.google.com/specimen/Fraunces), [Schibsted Grotesk](https://fonts.google.com/specimen/Schibsted+Grotesk) and [Martian Mono](https://fonts.google.com/specimen/Martian+Mono), via Google Fonts.
-- Built with Express, Prisma, Jest, Supertest, React, Vite and Tailwind CSS.
+AI sped up the repetitive parts: boilerplate, test scaffolding and CSS. It was weaker at keeping a large project consistent over many messages, so most of my debugging was mismatches between files generated at different times. What worked best was treating a failing test as a precise specification, running the suite after every step, and not accepting a step until it was green. I can walk through any layer of this project, including the JWT flow, the atomic purchase query and the test setup, and explain why it is built the way it is.
