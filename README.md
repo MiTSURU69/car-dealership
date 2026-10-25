@@ -6,7 +6,7 @@
 
 Node.js · TypeScript · Express · Prisma · SQLite · React · Tailwind CSS
 
-[**Live demo**](https://TODO-your-frontend.onrender.com) · [**API health**](https://apex-api-z6iy.onrender.com/api/health)
+[**Live demo**](https://apex-motor-store.onrender.com/) · [**API health**](https://apex-api-z6iy.onrender.com/api/health)
 
 ![Admin dashboard](docs/screenshots/02-dashboard-admin.png)
 
@@ -42,9 +42,9 @@ The project was built for the **TDD Kata: Car Dealership Inventory System**. Eve
 
 | | |
 |---|---|
-| **Website** | https://TODO-your-frontend.onrender.com |
+| **Website** | https://apex-motor-store.onrender.com/ |
 | **API** | https://apex-api-z6iy.onrender.com |
-| **Admin login** | `admin@example.com` / `TODO-admin-password` |
+| **Admin login** | `admin@example.com` / `admin1` |
 | **Customer login** | Click **Create an account** on the login page. It takes about 10 seconds. |
 
 > **Heads up:** the app runs on Render's free tier. The first request after a period of inactivity can take up to a minute while the API wakes up. The free disk also resets on restart, so the database is rebuilt on every start with the admin account and 12 demo vehicles. Any data you add may disappear later; that is expected.
@@ -85,7 +85,7 @@ The project was built for the **TDD Kata: Car Dealership Inventory System**. Eve
 | ![Add vehicle](docs/screenshots/05-add-vehicle.png) | ![Customer view](docs/screenshots/06-customer-view.png) |
 
 <p align="center">
-  <img src="docs/screenshots/07-mobile.png" alt="Mobile layout" width="320" />
+  <img src="docs/screenshots/07-mobile.jpeg" alt="Mobile layout" width="320" />
 </p>
 
 ## Architecture
