@@ -70,4 +70,16 @@ describe('GET /api/vehicles/search', () => {
     const res = await search('?minPrice=50000&maxPrice=1000');
     expect(res.status).toBe(400);
   });
+
+it('filters by exact quantity', async () => {
+  const res = await search('?quantity=2');
+  expect(res.status).toBe(200);
+  expect(res.body.vehicles).toHaveLength(1);
+  expect(res.body.vehicles[0].model).toBe('X5');
+});
+
+it('rejects invalid quantity with 400', async () => {
+  const res = await search('?quantity=-1');
+  expect(res.status).toBe(400);
+});
 });

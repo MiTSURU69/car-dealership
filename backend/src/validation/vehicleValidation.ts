@@ -70,6 +70,7 @@ export interface VehicleSearchFilters {
   category?: string;
   minPrice?: number;
   maxPrice?: number;
+  quantity?: number;
 }
 
 function optionalText(value: unknown): string | undefined {
@@ -93,6 +94,7 @@ export function parseSearchQuery(query: any): VehicleSearchFilters {
     category: optionalText(query?.category),
     minPrice: optionalPrice(query?.minPrice, 'minPrice'),
     maxPrice: optionalPrice(query?.maxPrice, 'maxPrice'),
+    quantity: query?.quantity === undefined || query?.quantity === '' ? undefined : validQuantity(Number(query.quantity)),
   };
 
   const { minPrice, maxPrice } = filters;

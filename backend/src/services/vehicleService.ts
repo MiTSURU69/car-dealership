@@ -48,9 +48,15 @@ function buildSearchFilter(filters: VehicleSearchFilters): Prisma.VehicleWhereIn
   if (filters.category) where.category = { contains: filters.category };
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
     where.price = { gte: filters.minPrice, lte: filters.maxPrice };
+    
+  }
+  
+  if (filters.quantity !== undefined) {
+    where.quantity = filters.quantity;
   }
   return where;
 }
+  
 
 /** Runs one filtered, sorted, paginated query and reports the totals. */
 async function findPage(where: Prisma.VehicleWhereInput, options: ListOptions): Promise<VehiclePage> {

@@ -2,7 +2,7 @@ import rateLimit from 'express-rate-limit';
 
 interface LimiterOptions {
   /** Length of the counting window, in milliseconds. */
-  windowMs: number;
+   windowMs: number;
   /** How many requests one IP may make inside the window. */
   max: number;
 }

@@ -4,6 +4,9 @@ module.exports = {
   roots: ['<rootDir>/tests'],
   globalSetup: '<rootDir>/tests/globalSetup.ts',
   setupFiles: ['<rootDir>/tests/setupEnv.ts'],
+  transform: {
+    '^.+\\.ts$': ['ts-jest', { tsconfig: 'tsconfig.test.json' }],
+  },
   collectCoverageFrom: ['src/**/*.ts', '!src/server.ts', '!src/scripts/**'],
   // SQLite is a single file, so run test files one at a time
   maxWorkers: 1,
