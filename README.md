@@ -43,9 +43,10 @@ The project was built for the **TDD Kata: Car Dealership Inventory System**. Eve
 | | |
 |---|---|
 | **Website** | https://apex-motor-store.onrender.com/ |
-| **API** | https://apex-api-z6iy.onrender.com |
+| **API** | https://apex-api-z6iy.onrender.com/api/health |
 | **Admin login** | `admin@example.com` / `admin1` |
 | **Customer login** | Click **Create an account** on the login page. It takes about 10 seconds. |
+| **WikiPedia API** | The API to display car info doesn't work properly in **Safari**
 
 > **Heads up:** the app runs on Render's free tier. The first request after a period of inactivity can take up to a minute while the API wakes up. The free disk also resets on restart, so the database is rebuilt on every start with the admin account and 12 demo vehicles. Any data you add may disappear later; that is expected.
 
@@ -349,7 +350,7 @@ I set the direction and made the decisions. Claude helped me draft and explain c
   - Vehicle photos come from Wikipedia rather than scraping car sites.
   - Sorting, pagination and rate limiting were added from a list of options I picked from.
   - Deployment is on Render.
-- **Frontend direction.** I gave the design brief (distinctive fonts, a committed palette, staggered animation, layered backgrounds) and reviewed the result in the browser. I asked for the pulsing logo dot to be removed because I didn't like it.
+- **Frontend direction.** I gave the design brief (distinctive fonts, a committed palette, staggered animation, layered backgrounds) and reviewed the result in the browser.
 - **Running and debugging.** I ran every command myself on Windows and worked through the problems that came up, including a Prisma and Node version clash, a `package.json` syntax error, a `tsconfig` problem that made Jest run every test twice (150 instead of 75), a misnamed test file the runner silently skipped, and the Render environment setup.
 - **Deployment and security.** I set up both Render services, the environment variables and the CORS lock. I also chose to keep secrets out of the repository and to use a throwaway admin password for the public demo.
 
